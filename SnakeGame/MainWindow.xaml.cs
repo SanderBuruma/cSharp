@@ -55,6 +55,8 @@ namespace SnakeGame
             MyTimer.Interval = TimerInterval;
             MyTimer.Enabled = true;
 
+            Brain brain = new Brain(5,7,3,11);
+
         }
         private void RedrawField()
         {

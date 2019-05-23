@@ -20,8 +20,9 @@ namespace SnakeGame
         private readonly int BoardWH = 16;
         internal Board Board1 { get; set; }
         private Rectangle[] FieldRectangles { get; set; }
+        private Brain SnakeBrain { get; set; }
         private Timer MyTimer { get; set; }
-        private readonly int TimerInterval = 75;
+        private readonly int TimerInterval = 1;
         private readonly int RectWidth = 20;
         private readonly int RectSpacing = 2;
         public MainWindow()
@@ -55,7 +56,7 @@ namespace SnakeGame
             MyTimer.Interval = TimerInterval;
             MyTimer.Enabled = true;
 
-            Brain brain = new Brain(5,7,3,11);
+            NewBrain();
 
         }
         private void RedrawField()
@@ -67,20 +68,102 @@ namespace SnakeGame
                     FieldRectangles[t].Fill = ReturnFieldBrush(Board1.Fields[t]);
                 }
         }
-        private void Progress1Tick()
+        private void TimerEventFunction()
         {
             if (Board1.GameOver)
                 return;
-            if (Board1.Progress1Tick())
+
+            RedrawField();
+            bool gameOver = true;
+            for (int i = 0; i < 1000; i++)
             {
-                RedrawField();
-                return;
+                if (Board1.Progress1Tick())
+                {
+                    RunBrain();
+                    gameOver = false;
+                }
+                else
+                {
+                    gameOver = true;
+                    break;
+                }
             }
+            if (!gameOver)
+                return;
 
             Board1.GameOver = true;
             //gameover
-            MessageBox.Show("You crashed into your own tail and died, your final score was " + (Board1.Score).ToString());
+            double score = Board1.Score;
+            score += Math.Pow(Board1.TailLength, 2)/Board1.Tick*1e3;
+
+            if (score > 10e2)
+            {
+                RedrawField();
+                MessageBox.Show("You crashed into your own tail and died or you ran out of time, your final score was " + string.Format("{0:N2}", score) + "\n\nGrow more quickly and grow larger to gain a larger score");
+            }
+
             Board1 = new Board(BoardWH);
+            NewBrain();
+        }
+        private void RunBrain()
+        {
+            double[] perceptronsValues = new double[11]
+            {
+                (double)Board1.TailLength/Board1.WidthHeight/Board1.WidthHeight*2,
+                (double)Board1.SnakeDirection/3,
+                //distance to food left, up, right, down
+                (double)1e3*Board1.DistanceLeft(Board1.SnakeHeadX, Board1.FoodX)/Board1.WidthHeight,
+                (double)1e3*Board1.DistanceUp(Board1.SnakeHeadY, Board1.FoodY)/Board1.WidthHeight,
+                (double)1e3*Board1.DistanceRight(Board1.SnakeHeadX, Board1.FoodX)/Board1.WidthHeight,
+                (double)1e3*Board1.DistanceDown(Board1.SnakeHeadY, Board1.FoodY)/Board1.WidthHeight,
+                //distance to nearest tail piece
+                0,
+                0,
+                0,
+                0,
+                1e3 * new Random().NextDouble()
+            };
+
+            double[] tailDistances = new double[4] {
+                Board1.WidthHeight-1,
+                Board1.WidthHeight-1,
+                Board1.WidthHeight-1,
+                Board1.WidthHeight-1 };
+            for (int i = 0; i < Board1.TailLength; i++)
+            {
+                if (Board1.TailY[i] == Board1.SnakeHeadY)
+                {
+                    tailDistances[0] = Math.Min(tailDistances[0], Board1.DistanceLeft(Board1.SnakeHeadX, Board1.TailX[i]));
+                    tailDistances[2] = Math.Min(tailDistances[2], Board1.DistanceRight(Board1.SnakeHeadX, Board1.TailX[i]));
+                }
+                if (Board1.TailX[i] == Board1.SnakeHeadX)
+                {
+                    tailDistances[1] = Math.Min(tailDistances[1], Board1.DistanceUp(Board1.SnakeHeadY, Board1.TailY[i]));
+                    tailDistances[3] = Math.Min(tailDistances[3], Board1.DistanceDown(Board1.SnakeHeadY, Board1.TailY[i]));
+                }
+            }
+            perceptronsValues[6] = tailDistances[0] / (Board1.WidthHeight - 1);
+            perceptronsValues[7] = tailDistances[1] / (Board1.WidthHeight - 1);
+            perceptronsValues[8] = tailDistances[2] / (Board1.WidthHeight - 1);
+            perceptronsValues[9] = tailDistances[3] / (Board1.WidthHeight - 1);
+
+            //calculate what the brain "thinks" that it should output
+            double[] brainThoughts = SnakeBrain.InputToOutput(perceptronsValues);
+
+            double maxvalue = brainThoughts.Max();
+            for (int i = 0; i < 4; i++)
+            {
+                if (maxvalue == brainThoughts[i])
+                {
+                    Board1.ChangeDirection((Board.Direction)i);
+                    break;
+                }
+            }
+        }
+
+        private void NewBrain()
+        {
+            SnakeBrain = new Brain(11, 3, 6, 4);
         }
         private Brush ReturnFieldBrush(Board.Field field)
         {
@@ -108,7 +191,7 @@ namespace SnakeGame
         private void ProgressEvent(object source, ElapsedEventArgs e) {
             Dispatcher.Invoke(() =>
             {
-                Progress1Tick();
+                TimerEventFunction();
             });
         }
 

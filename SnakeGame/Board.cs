@@ -122,6 +122,9 @@ namespace SnakeGame
                     return false;
                 }
             }
+            //timeout
+            if (TailLength < Tick / 200)
+                return false;
 
             return true;
         }
@@ -166,6 +169,42 @@ namespace SnakeGame
                 if (isEmpty) return randomField;
             }
         }
+        public int DistanceLeft(int x1, int x2)
+        {
+            if (x1 > x2)
+                return x1 - x2;
+            else if (x1 < x2)
+                return x1 + (WidthHeight - x2);
+            else
+                return 0;
+        }
+        public int DistanceUp(int y1, int y2)
+        {
+            if (y2 > y1)
+                return y2 - y1;
+            else if (y2 < y1)
+                return y2 + (WidthHeight - y1);
+            else
+                return 0;
+        }
+        public int DistanceRight(int x1, int x2)
+        {
+            if (x2 > x1)
+                return x2 - x1;
+            else if (x2 < x1)
+                return x2 + (WidthHeight - x1);
+            else
+                return 0;
+        }
+        public int DistanceDown(int y1, int y2)
+        {
+            if (y1 > y2)
+                return y1 - y2;
+            else if (y1 < y2)
+                return y1 + (WidthHeight - y2);
+            else
+                return 0;
+        }
         private int X(int num)
         {// returns the X position congruent with the value of num
             return num % WidthHeight;
@@ -183,10 +222,10 @@ namespace SnakeGame
         }
         internal enum Direction
         {
+            left,
             up,
             right,
-            down,
-            left
+            down
         }
     }
 

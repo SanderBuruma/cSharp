@@ -46,14 +46,14 @@ namespace SnakeGame
 
             for (int j = 0; j < hiddenlayerwidth; j++)
                 for (int i = 0; i < hiddenlayerheight; i++)
-                    HiddenNeuronsBaseVals[j, i] = rng.NextDouble();
+                    HiddenNeuronsBaseVals[j, i] = RandomFloat();
 
             for (int i = 0; i < NeuronConnections.Length; i++)
                 for (int j = 0; j < NeuronConnections[i].Length; j++)
-                    NeuronConnections[i][j] = rng.NextDouble();
+                    NeuronConnections[i][j] = RandomFloat();
 
             for (int i = 0; i < OutputNeuronsBaseValues.Length; i++)
-                OutputNeuronsBaseValues[i] = rng.NextDouble();
+                OutputNeuronsBaseValues[i] = RandomFloat();
         }
 
         public double[] InputToOutput(double[] perceptronValues)
@@ -68,15 +68,15 @@ namespace SnakeGame
                 nextLayerNeurons[i] = 0;
                 for (int j = 0; j < Perceptrons; j++)
                     nextLayerNeurons[i] += perceptronValues[j] * NeuronConnections[0][j + i * Perceptrons];
-                nextLayerNeurons[i] *= HiddenNeuronsBaseVals[0, i];
+                nextLayerNeurons[i] += HiddenNeuronsBaseVals[0, i];
                 nextLayerNeurons[i] = Sigmoid(nextLayerNeurons[i]);
             }
 
             // propagate values from one hidden layer to the next
             double[] currentLayerNeurons = new double[HiddenLayerHeight];
-            currentLayerNeurons = nextLayerNeurons;
             for (int i = 1; i < HiddenLayerWidth; i++)
             {
+                currentLayerNeurons = nextLayerNeurons;
                 nextLayerNeurons = new double[HiddenLayerHeight];
                 for (int j = 0; j < nextLayerNeurons.Length; j++)
                     nextLayerNeurons[j] = 0;
@@ -84,7 +84,7 @@ namespace SnakeGame
                 {
                     for (int k = 0; k < HiddenLayerHeight; k++)
                         nextLayerNeurons[j] += currentLayerNeurons[i - 1] * NeuronConnections[i][j * HiddenLayerHeight + k];
-                    nextLayerNeurons[j] *= HiddenNeuronsBaseVals[i - 1, j];
+                    nextLayerNeurons[j] += HiddenNeuronsBaseVals[i - 1, j];
                     nextLayerNeurons[j] = Sigmoid(nextLayerNeurons[j]);
                 }
             }
@@ -97,11 +97,16 @@ namespace SnakeGame
                 nextLayerNeurons[i] = 0;
                 for (int j = 0; j < HiddenLayerHeight; j++)
                     nextLayerNeurons[i] += NeuronConnections[NeuronConnections.Length - 1][i * OutputNeurons + j] * currentLayerNeurons[j];
-                nextLayerNeurons[i] *= OutputNeuronsBaseValues[i];
+                nextLayerNeurons[i] += OutputNeuronsBaseValues[i];
                 nextLayerNeurons[i] = Sigmoid(nextLayerNeurons[i]);
             }
 
             return nextLayerNeurons;
+        }
+
+        public double RandomFloat(double range = 1)
+        {
+            return rng.NextDouble() * range * 2 - range;
         }
 
         public static double Sigmoid(double value)

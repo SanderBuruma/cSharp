@@ -22,17 +22,24 @@ namespace SnakeGame
         private Rectangle[] FieldRectangles { get; set; }
         private Brain SnakeBrain { get; set; }
         private Timer MyTimer { get; set; }
+        private double ScoreTreshold { get; set; } = 2e3;
         private readonly int TimerInterval = 1;
         private readonly int RectWidth = 20;
         private readonly int RectSpacing = 2;
+        private readonly Random rng = new Random();
         public MainWindow()
         {
             InitializeComponent();
-            Board1 = new Board(BoardWH);
 
             MainWindow1.Width = 22 + (RectWidth + RectSpacing) * BoardWH;
             MainWindow1.Height = 42 + (RectWidth + RectSpacing) * BoardWH;
-
+        }
+        /*
+         * This mode should generate new SnakeBrain####.dat files which have scored above a certain treshold
+         */
+        private void ModeGenerateNewBrains()
+        {
+            Board1 = new Board(BoardWH);
             FieldRectangles = new Rectangle[BoardWH * BoardWH];
             for (int i = 0; i < BoardWH; i++)
                 for (int j = 0; j < BoardWH; j++)
@@ -43,7 +50,7 @@ namespace SnakeGame
                         Width = RectWidth,
                         Height = RectWidth,
                         Margin = new Thickness(5 + (RectWidth + RectSpacing) * i, 0, 0, 5 + (RectWidth + RectSpacing) * j),
-                        Fill = ReturnFieldBrush(Board1.Fields[i+j*BoardWH]),
+                        Fill = ReturnFieldBrush(Board1.Fields[i + j * BoardWH]),
                         VerticalAlignment = VerticalAlignment.Bottom,
                         HorizontalAlignment = HorizontalAlignment.Left
                     };
@@ -57,7 +64,6 @@ namespace SnakeGame
             MyTimer.Enabled = true;
 
             NewBrain();
-
         }
         private void RedrawField()
         {
@@ -68,7 +74,7 @@ namespace SnakeGame
                     FieldRectangles[t].Fill = ReturnFieldBrush(Board1.Fields[t]);
                 }
         }
-        private void TimerEventFunction()
+        private void TimerEvent()
         {
             if (Board1.GameOver)
                 return;
@@ -96,7 +102,7 @@ namespace SnakeGame
             double score = Board1.Score;
             score += Math.Pow(Board1.TailLength, 2)/Board1.Tick*1e3;
 
-            if (score > 10e2)
+            if (score > ScoreTreshold)
             {
                 RedrawField();
                 MessageBox.Show("You crashed into your own tail and died or you ran out of time, your final score was " + string.Format("{0:N2}", score) + "\n\nGrow more quickly and grow larger to gain a larger score");
@@ -116,12 +122,13 @@ namespace SnakeGame
                 (double)1e3*Board1.DistanceUp(Board1.SnakeHeadY, Board1.FoodY)/Board1.WidthHeight,
                 (double)1e3*Board1.DistanceRight(Board1.SnakeHeadX, Board1.FoodX)/Board1.WidthHeight,
                 (double)1e3*Board1.DistanceDown(Board1.SnakeHeadY, Board1.FoodY)/Board1.WidthHeight,
-                //distance to nearest tail piece
+                //distance to nearest tail piece l,u,r,d
                 0,
                 0,
                 0,
                 0,
-                1e3 * new Random().NextDouble()
+                //an rng factor to allow the snake to have some randomness (and prevent repeating patterns)
+                1e3 * rng.NextDouble()
             };
 
             double[] tailDistances = new double[4] {
@@ -142,10 +149,10 @@ namespace SnakeGame
                     tailDistances[3] = Math.Min(tailDistances[3], Board1.DistanceDown(Board1.SnakeHeadY, Board1.TailY[i]));
                 }
             }
-            perceptronsValues[6] = tailDistances[0] / (Board1.WidthHeight - 1);
-            perceptronsValues[7] = tailDistances[1] / (Board1.WidthHeight - 1);
-            perceptronsValues[8] = tailDistances[2] / (Board1.WidthHeight - 1);
-            perceptronsValues[9] = tailDistances[3] / (Board1.WidthHeight - 1);
+            perceptronsValues[6] = 1e3 * tailDistances[0] / (Board1.WidthHeight - 1);
+            perceptronsValues[7] = 1e3 * tailDistances[1] / (Board1.WidthHeight - 1);
+            perceptronsValues[8] = 1e3 * tailDistances[2] / (Board1.WidthHeight - 1);
+            perceptronsValues[9] = 1e3 * tailDistances[3] / (Board1.WidthHeight - 1);
 
             //calculate what the brain "thinks" that it should output
             double[] brainThoughts = SnakeBrain.InputToOutput(perceptronsValues);
@@ -163,7 +170,7 @@ namespace SnakeGame
 
         private void NewBrain()
         {
-            SnakeBrain = new Brain(11, 3, 6, 4);
+            SnakeBrain = new Brain(11, 3, 12, 4);
         }
         private Brush ReturnFieldBrush(Board.Field field)
         {
@@ -191,7 +198,7 @@ namespace SnakeGame
         private void ProgressEvent(object source, ElapsedEventArgs e) {
             Dispatcher.Invoke(() =>
             {
-                TimerEventFunction();
+                TimerEvent();
             });
         }
 
@@ -199,27 +206,32 @@ namespace SnakeGame
         {
             switch (e.Key)
             {
-                case Key.W:
-                    Board1.ChangeDirection(Board.Direction.up);
-                    break;
-                case Key.A:
-                    Board1.ChangeDirection(Board.Direction.left);
-                    break;
-                case Key.S:
-                    Board1.ChangeDirection(Board.Direction.down);
-                    break;
-                case Key.D:
-                    Board1.ChangeDirection(Board.Direction.right);
-                    break;
                 case Key.Escape:
                     Application.Current.Shutdown();
                     break;
                 case Key.P:
+                    RedrawField();
                     Pause();
                     break;
                 default:
                     break;
             }
+        }
+
+        private void ModeNewBrainsBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (!double.TryParse(ModeNewBrainsTresholdBox.Text, out double dbl))
+            {
+                MessageBox.Show("Invalid treshold value");
+                return;
+            }
+
+            int len = MainGrid.Children.Count;
+            for (int i = 0; i < len; i++)
+                MainGrid.Children.RemoveAt(0);
+
+            ScoreTreshold = dbl;
+            ModeGenerateNewBrains();
         }
     }
 }

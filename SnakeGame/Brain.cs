@@ -12,6 +12,7 @@ namespace SnakeGame
     the double values of neurons represent their base values (presigmoid)
     the double values of connections represent the weights they apply to their next neuron
     */
+    [Serializable]
     class Brain
     {
         private int Perceptrons { get; set; }

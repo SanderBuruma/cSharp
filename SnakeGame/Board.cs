@@ -21,6 +21,7 @@ namespace SnakeGame
         public int TailLength { get; set; }
         public int Score { get; set; }
         public int Tick { get; set; } = 0;
+        public int TicksLeft { get; set; } = 100;
         public bool GameOver = false;
         private bool CanSwitchDir = true;
         private readonly Random rng = new Random();
@@ -105,11 +106,13 @@ namespace SnakeGame
                 int ef = FindEmptyField();
                 TailX[TailLength] = TailX[TailLength - 1];
                 TailY[TailLength] = TailY[TailLength - 1];
-                if (TailLength < FieldsCount / 2)
+                if (TailLength+1 < FieldsCount / 2)
                     TailLength++;
                 Score += 10;
                 FoodX = X(ef);
                 FoodY = Y(ef);
+
+                TicksLeft = 200;
             }
 
             Tick++;
@@ -123,7 +126,7 @@ namespace SnakeGame
                 }
             }
             //timeout
-            if (TailLength < Tick / 200)
+            if (--TicksLeft == 0)
                 return false;
 
             return true;

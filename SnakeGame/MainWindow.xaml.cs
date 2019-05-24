@@ -191,10 +191,10 @@ namespace SnakeGame
                 (double)Board1.TailLength/Board1.WidthHeight/Board1.WidthHeight*2,
                 (double)Board1.SnakeDirection/3,
                 //distance to food left, up, right, down
-                (double)1e3*Board1.DistanceLeft(Board1.SnakeHeadX, Board1.FoodX)/Board1.WidthHeight,
-                (double)1e3*Board1.DistanceUp(Board1.SnakeHeadY, Board1.FoodY)/Board1.WidthHeight,
-                (double)1e3*Board1.DistanceRight(Board1.SnakeHeadX, Board1.FoodX)/Board1.WidthHeight,
-                (double)1e3*Board1.DistanceDown(Board1.SnakeHeadY, Board1.FoodY)/Board1.WidthHeight,
+                (double)1e3 * Board1.DistanceLeft(Board1.SnakeHeadX, Board1.FoodX)/Board1.WidthHeight,
+                (double)1e3 * Board1.DistanceUp(Board1.SnakeHeadY, Board1.FoodY)/Board1.WidthHeight,
+                (double)1e3 * Board1.DistanceRight(Board1.SnakeHeadX, Board1.FoodX)/Board1.WidthHeight,
+                (double)1e3 * Board1.DistanceDown(Board1.SnakeHeadY, Board1.FoodY)/Board1.WidthHeight,
                 //distance to nearest tail piece l,u,r,d
                 0,
                 0,
@@ -273,6 +273,11 @@ namespace SnakeGame
                 MyTimer.Enabled = true;
         }
 
+        private double CalculateScore()
+        {
+            return Math.Pow(Board1.TailLength, 2) / Board1.Tick * 1e3;
+        }
+
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.Key)
@@ -287,10 +292,6 @@ namespace SnakeGame
                 default:
                     break;
             }
-        }
-        private double CalculateScore()
-        {
-            return Math.Pow(Board1.TailLength, 2) / Board1.Tick * 1e3;
         }
 
         private void ModeNewBrainsBtn_Click(object sender, RoutedEventArgs e)
@@ -435,9 +436,9 @@ namespace SnakeGame
                 prevScore += CalculateScore()/iterations;
             }
 
-            int count = 10000;
+            int count = 1000000000;
             while (--count > 0)
-            {
+                {
                 double score = Math.Floor(ModeTrainAI(degree, nrr, iterations));
                 if (score/treshold > prevScore)
                 {

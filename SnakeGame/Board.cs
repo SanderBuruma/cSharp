@@ -24,7 +24,7 @@ namespace SnakeGame
         public int TicksLeft { get; set; } = 100;
         public bool GameOver = false;
         private bool CanSwitchDir = true;
-        private readonly Random rng = new Random();
+        private readonly Random rng = new Random(0);
         public Board(int widthHeight)
         {
             if (widthHeight % 2 != 0)

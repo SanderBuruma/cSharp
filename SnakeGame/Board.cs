@@ -35,8 +35,8 @@ namespace SnakeGame
             SnakeHeadX = (int)Math.Floor((double)WidthHeight / 2);
             SnakeHeadY = (int)Math.Floor((double)WidthHeight / 2);
 
-            TailX = new int[WidthHeight * WidthHeight / 2];
-            TailY = new int[WidthHeight * WidthHeight / 2];
+            TailX = new int[WidthHeight * WidthHeight];
+            TailY = new int[WidthHeight * WidthHeight];
             TailLength = 1;
             TailX[0] = SnakeHeadX-1;
             TailY[0] = SnakeHeadY;
@@ -106,7 +106,7 @@ namespace SnakeGame
                 int ef = FindEmptyField();
                 TailX[TailLength] = TailX[TailLength - 1];
                 TailY[TailLength] = TailY[TailLength - 1];
-                if (TailLength+1 < FieldsCount / 2)
+                if (TailLength < FieldsCount)
                     TailLength++;
                 Score += 10;
                 FoodX = X(ef);

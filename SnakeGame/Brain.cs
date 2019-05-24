@@ -7,11 +7,11 @@ using System.Windows;
 
 namespace SnakeGame
 {
-    /*
-    every neuron's and connection's double value will be constrained by the sigmoid function
-    the double values of neurons represent their base values (presigmoid)
-    the double values of connections represent the weights they apply to their next neuron
-    */
+    ///<summary>
+    ///every neuron's and connection's double value will be constrained by the sigmoid function<br/>
+    ///the double values of neurons represent their base values (presigmoid)<br/>
+    ///the double values of connections represent the weights they apply to their next neuron
+    ///</summary>
     [Serializable]
     class Brain
     {
@@ -47,14 +47,14 @@ namespace SnakeGame
 
             for (int j = 0; j < hiddenlayerwidth; j++)
                 for (int i = 0; i < hiddenlayerheight; i++)
-                    HiddenNeuronsBaseVals[j, i] = RandomFloat();
+                    HiddenNeuronsBaseVals[j, i] = RandomDouble();
 
             for (int i = 0; i < NeuronConnections.Length; i++)
                 for (int j = 0; j < NeuronConnections[i].Length; j++)
-                    NeuronConnections[i][j] = RandomFloat();
+                    NeuronConnections[i][j] = RandomDouble();
 
             for (int i = 0; i < OutputNeuronsBaseValues.Length; i++)
-                OutputNeuronsBaseValues[i] = RandomFloat();
+                OutputNeuronsBaseValues[i] = RandomDouble();
         }
 
         public double[] InputToOutput(double[] perceptronValues)
@@ -104,8 +104,45 @@ namespace SnakeGame
 
             return nextLayerNeurons;
         }
+        /// <summary>
+        /// RAndomly mutates the neurons and neuron connections of this AI to a degree specified by the arguments<br/><br/>
+        /// </summary>
+        /// <param name="degree">determines the amount by which a neuron can change.</param>
+        /// <param name="normalRangeRepeats">normalRangeRepeats determines how much the random number approaches a normal distribution.</param>
+        public void Mutate(double degree, int normalRangeRepeats = 4)
+        {
+            for (int i = 0; i < HiddenLayerWidth; i++)
+                for (int j = 0; j < HiddenLayerHeight; j++)
+                {
+                    double tempDouble = 0;
+                    for (int k = 0; k < normalRangeRepeats; k++)
+                        tempDouble += RandomDouble(degree);
+                    tempDouble /= normalRangeRepeats;
+                    HiddenNeuronsBaseVals[i, j] += tempDouble;
+                }
 
-        public double RandomFloat(double range = 1)
+            for (int i = 0; i < OutputNeurons; i++)
+                {
+                    double tempDouble = 0;
+                    for (int k = 0; k < normalRangeRepeats; k++)
+                        tempDouble += RandomDouble(degree);
+                    tempDouble /= normalRangeRepeats;
+                    tempDouble += 1;
+                    OutputNeuronsBaseValues[i] *= tempDouble;
+                }
+
+            for (int i = 0; i < NeuronConnections.Length; i++)
+                for (int j = 0; j < NeuronConnections[i].Length; j++)
+                {
+                    double tempDouble = 0;
+                    for (int k = 0; k < normalRangeRepeats; k++)
+                        tempDouble += RandomDouble(degree);
+                    tempDouble /= normalRangeRepeats;
+                    tempDouble += 1;
+                    NeuronConnections[i][j] *= tempDouble;
+                }
+        }
+        public double RandomDouble(double range = 1)
         {
             return rng.NextDouble() * range * 2 - range;
         }

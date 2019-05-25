@@ -24,7 +24,7 @@ namespace SnakeGame
         // the first index represents connection layer (the fist involve perceptrons, the last 
         // involve output neurons and the others involve intra-hidden layer connections)
         private double[][] NeuronConnections { get; set; }
-        private Random rng = new Random((int)DateTime.Now.Ticks);
+        private Random rng = new Random();
 
         public Brain(
             int perceptrons, 
@@ -105,52 +105,51 @@ namespace SnakeGame
             return nextLayerNeurons;
         }
         /// <summary>
-        /// RAndomly mutates the neurons and neuron connections of this AI to a degree specified by the arguments<br/><br/>
+        /// Randomly mutates the neurons and neuron connections of this AI to a degree specified by the arguments<br/><br/>
         /// </summary>
         /// <param name="degree">determines the amount by which a neuron can change.</param>
         /// <param name="normalRangeRepeats">normalRangeRepeats determines how much the random number approaches a normal distribution.</param>
-        public void Mutate(double degree, int normalRangeRepeats = 4)
+        /// <param name="chanceOfMutation">Determines the chance of a mutation in a connection or neuron.<br/>10 = 10% chance, 100 = 1% chance, 1000 = 0.1% chance.</param>
+        public void Mutate(double degree, int normalRangeRepeats = 4, int chanceOfMutation = 10)
         {
             rng = new Random((int)DateTime.Now.Ticks);
             for (int i = 0; i < HiddenLayerWidth; i++)
                 for (int j = 0; j < HiddenLayerHeight; j++)
                 {
-                    double tempDouble = 0;
-                    for (int k = 0; k < normalRangeRepeats; k++)
-                        tempDouble += RandomDouble(degree);
-                    tempDouble /= normalRangeRepeats;
-                    HiddenNeuronsBaseVals[i, j] += tempDouble;
+                    if (rng.Next(chanceOfMutation) != 0) continue;
+                    HiddenNeuronsBaseVals[i, j] += MutationMagnitude(normalRangeRepeats, degree);
                 }
 
             for (int i = 0; i < OutputNeurons; i++)
                 {
-                    double tempDouble = 0;
-                    for (int k = 0; k < normalRangeRepeats; k++)
-                        tempDouble += RandomDouble(degree);
-                    tempDouble /= normalRangeRepeats;
-                    tempDouble += 1;
-                    OutputNeuronsBaseValues[i] *= tempDouble;
+                    if (rng.Next(chanceOfMutation) != 0) continue;
+                    OutputNeuronsBaseValues[i] += MutationMagnitude(normalRangeRepeats, degree);
                 }
 
             for (int i = 0; i < NeuronConnections.Length; i++)
                 for (int j = 0; j < NeuronConnections[i].Length; j++)
                 {
-                    double tempDouble = 0;
-                    for (int k = 0; k < normalRangeRepeats; k++)
-                        tempDouble += RandomDouble(degree);
-                    tempDouble /= normalRangeRepeats;
-                    tempDouble += 1;
-                    NeuronConnections[i][j] *= tempDouble;
+                    if (rng.Next(chanceOfMutation) != 0) continue;
+                    NeuronConnections[i][j] += MutationMagnitude(normalRangeRepeats, degree);
                 }
         }
         public double RandomDouble(double range = 1)
         {
-            return rng.NextDouble() * range * 2 - range;
+            return (double)rng.Next(5)-2;
         }
 
         public static double Sigmoid(double value)
         {
             return 1.0f / (1.0f + (float)Math.Exp(-value));
+        }
+
+        public double MutationMagnitude(int nrr, double degree)
+        {
+            double tempDouble = 0;
+            for (int k = 0; k < nrr; k++)
+                tempDouble += RandomDouble(degree);
+            tempDouble /= nrr;
+            return tempDouble;
         }
     }
 }

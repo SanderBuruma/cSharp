@@ -24,7 +24,7 @@ namespace SnakeGame
         public int TicksLeft { get; set; } = 100;
         public bool GameOver = false;
         private bool CanSwitchDir = true;
-        private readonly Random rng = new Random(0);
+        private readonly Random rng = new Random();
         public Board(int widthHeight)
         {
             if (widthHeight % 2 != 0)
@@ -52,12 +52,12 @@ namespace SnakeGame
         }
         public void ChangeDirection(Direction dir)
         {
+            int k = (int)SnakeDirection;
             if (CanSwitchDir)
-                if ((int)dir%2 != (int)SnakeDirection%2)
-                {
-                    SnakeDirection = dir;
-                    CanSwitchDir = false;
-                }
+                if (dir == Direction.right)
+                    SnakeDirection = (Direction)((k + 1) % 4);
+                if (dir == Direction.left)
+                    SnakeDirection = (Direction)((k + 3) % 4);
         }
         public bool Progress1Tick()
         {
@@ -126,7 +126,7 @@ namespace SnakeGame
                 }
             }
             //timeout
-            if (--TicksLeft == 0)
+            if (--TicksLeft < 1)
                 return false;
 
             return true;

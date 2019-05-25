@@ -64,11 +64,11 @@ namespace SnakeGame
                 }
 
         }
-        private void ModeGenerateNewBrains()
+        private void ModeGenerateNewBrains(int hlWidth, int hlHeight)
         {
             NewBoard();
             DrawFieldRectangles();
-            NewBrain();
+            NewBrain(hlWidth, hlHeight);
             while (savedFilesCount < savedFilesMax)
             {
                 RedrawField();
@@ -117,7 +117,7 @@ namespace SnakeGame
                 }
 
                 NewBoard();
-                NewBrain();
+                NewBrain(hlWidth, hlHeight);
             }
             MessageBox.Show("End of program, " + savedFilesCount.ToString() + " brain files generated.\nReview the executables' folder to see the brain files");
         }
@@ -141,9 +141,9 @@ namespace SnakeGame
         /// <param name="iterations">The number of times the snake plays the game before returning the average score.</param>
         /// <param name="mutateNRR">Determines how much mutation magnitude distrubtion conforms to a normal distrubtion.</param>
         /// <returns>the average score</returns>
-        private double ModeTrainAI(double mutateMagnitude = .1, int mutateNRR = 4, int iterations = 100)
+        private double ModeTrainAI(double mutateMagnitude = .1, int mutateNRR = 4, int iterations = 100, int mutationChance = 5)
         {
-            SnakeBrain.Mutate(mutateMagnitude, mutateNRR);
+            SnakeBrain.Mutate(mutateMagnitude, mutateNRR, mutationChance);
             double averageScore = 0;
             for (int i = 0; i < iterations; i++)
             {
@@ -170,7 +170,7 @@ namespace SnakeGame
             else
             {//gameOver
                 MyTimer.Enabled = false;
-                MessageBox.Show("This bot scored " + string.Format("{0:N2}", CalculateScore()) + " points!\nIt crashed or it ran out of time.");
+                //MessageBox.Show("This bot scored " + string.Format("{0:N2}", CalculateScore()) + " points!\nIt crashed or it ran out of time.");
                 MyTimer.Enabled = true;
                 NewBoard();
             }
@@ -186,22 +186,15 @@ namespace SnakeGame
         }
         private void RunBrain()
         {
-            double[] perceptronsValues = new double[11]
+            double[] perceptronsValues = new double[5]
             {
                 (double)Board1.TailLength/Board1.WidthHeight/Board1.WidthHeight*2,
-                (double)Board1.SnakeDirection/3,
-                //distance to food left, up, right, down
-                (double)1e3 * Board1.DistanceLeft(Board1.SnakeHeadX, Board1.FoodX)/Board1.WidthHeight,
-                (double)1e3 * Board1.DistanceUp(Board1.SnakeHeadY, Board1.FoodY)/Board1.WidthHeight,
-                (double)1e3 * Board1.DistanceRight(Board1.SnakeHeadX, Board1.FoodX)/Board1.WidthHeight,
-                (double)1e3 * Board1.DistanceDown(Board1.SnakeHeadY, Board1.FoodY)/Board1.WidthHeight,
-                //distance to nearest tail piece l,u,r,d
-                0,
-                0,
-                0,
-                0,
                 //an rng factor to allow the snake to have some randomness (and prevent repeating patterns)
-                1e3 * rng.NextDouble()
+                rng.NextDouble(),
+                //distance to food left, up, right, down
+                0,
+                0,
+                0,
             };
 
             double[] tailDistances = new double[4] {
@@ -222,28 +215,97 @@ namespace SnakeGame
                     tailDistances[3] = Math.Min(tailDistances[3], Board1.DistanceDown(Board1.SnakeHeadY, Board1.TailY[i]));
                 }
             }
-            perceptronsValues[6] = 1e3 * tailDistances[0] / (Board1.WidthHeight - 1);
-            perceptronsValues[7] = 1e3 * tailDistances[1] / (Board1.WidthHeight - 1);
-            perceptronsValues[8] = 1e3 * tailDistances[2] / (Board1.WidthHeight - 1);
-            perceptronsValues[9] = 1e3 * tailDistances[3] / (Board1.WidthHeight - 1);
+            double[] foodDistances = new double[4] {
+                Board1.DistanceLeft(Board1.SnakeHeadX, Board1.FoodX),
+                Board1.DistanceUp(Board1.SnakeHeadY, Board1.FoodY),
+                Board1.DistanceRight(Board1.SnakeHeadX, Board1.FoodX),
+                Board1.DistanceDown(Board1.SnakeHeadY, Board1.FoodY)
+            };
+
+            switch (Board1.SnakeDirection)
+            {
+                case Board.Direction.left:
+                    if (tailDistances[0] < foodDistances[0])
+                        perceptronsValues[2] = -(Board1.WidthHeight-tailDistances[0]);
+                    else
+                        perceptronsValues[2] = Board1.WidthHeight - foodDistances[0];
+                    if (tailDistances[1] < foodDistances[1])
+                        perceptronsValues[3] = -(Board1.WidthHeight - tailDistances[1]);
+                    else
+                        perceptronsValues[3] = Board1.WidthHeight - foodDistances[1];
+                    if (tailDistances[3] < foodDistances[3])
+                        perceptronsValues[4] = -(Board1.WidthHeight - tailDistances[3]);
+                    else
+                        perceptronsValues[4] = Board1.WidthHeight - foodDistances[3];
+                    break;
+                case Board.Direction.up:
+                    if (tailDistances[1] < foodDistances[1])
+                        perceptronsValues[2] = -(Board1.WidthHeight - tailDistances[1]);
+                    else
+                        perceptronsValues[2] = Board1.WidthHeight - foodDistances[1];
+                    if (tailDistances[2] < foodDistances[2])
+                        perceptronsValues[3] = -(Board1.WidthHeight - tailDistances[2]);
+                    else
+                        perceptronsValues[3] = Board1.WidthHeight - foodDistances[2];
+                    if (tailDistances[0] < foodDistances[0])
+                        perceptronsValues[4] = -(Board1.WidthHeight - tailDistances[0]);
+                    else
+                        perceptronsValues[4] = Board1.WidthHeight - foodDistances[0];
+                    break;
+                case Board.Direction.right:
+                    if (tailDistances[2] < foodDistances[2])
+                        perceptronsValues[2] = -(Board1.WidthHeight - tailDistances[2]);
+                    else
+                        perceptronsValues[2] = Board1.WidthHeight - foodDistances[2];
+                    if (tailDistances[3] < foodDistances[3])
+                        perceptronsValues[3] = -(Board1.WidthHeight - tailDistances[3]);
+                    else
+                        perceptronsValues[3] = Board1.WidthHeight - foodDistances[3];
+                    if (tailDistances[1] < foodDistances[1])
+                        perceptronsValues[4] = -(Board1.WidthHeight - tailDistances[1]);
+                    else
+                        perceptronsValues[4] = Board1.WidthHeight - foodDistances[1];
+                    break;
+                case Board.Direction.down:
+                    if (tailDistances[3] < foodDistances[3])
+                        perceptronsValues[2] = -(Board1.WidthHeight - tailDistances[3]);
+                    else
+                        perceptronsValues[2] = Board1.WidthHeight - foodDistances[3];
+                    if (tailDistances[0] < foodDistances[0])
+                        perceptronsValues[3] = -(Board1.WidthHeight - tailDistances[0]);
+                    else
+                        perceptronsValues[3] = Board1.WidthHeight - foodDistances[0];
+                    if (tailDistances[2] < foodDistances[2])
+                        perceptronsValues[4] = -(Board1.WidthHeight - tailDistances[2]);
+                    else
+                        perceptronsValues[4] = Board1.WidthHeight - foodDistances[2];
+                    break;
+            }
+            for (int i = 2; i < 5; i++)
+            {
+                perceptronsValues[i] /= Board1.WidthHeight;
+            }
 
             //calculate what the brain "thinks" that it should output
             double[] brainThoughts = SnakeBrain.InputToOutput(perceptronsValues);
 
             double maxvalue = brainThoughts.Max();
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 3; i++)
             {
                 if (maxvalue == brainThoughts[i])
                 {
-                    Board1.ChangeDirection((Board.Direction)i);
+                    if (i == 1)
+                        Board1.ChangeDirection(Board.Direction.right);
+                    else if (i == 2)
+                        Board1.ChangeDirection(Board.Direction.left);
                     break;
                 }
             }
         }
 
-        private void NewBrain()
+        private void NewBrain(int hlWidth, int hlHeight)
         {
-            SnakeBrain = new Brain(11, 3, 12, 4);
+            SnakeBrain = new Brain(5, hlWidth, hlHeight, 3);
         }
         private void NewBoard()
         {
@@ -307,13 +369,23 @@ namespace SnakeGame
                 MessageBox.Show("Invalid desired brains value, input an integer");
                 return;
             }
+            if (!int.TryParse(ModeNewBrainsHLWidthBox.Text, out int hlWidth))
+            {
+                MessageBox.Show("Invalid desired HL width value, input an integer");
+                return;
+            }
+            if (!int.TryParse(ModeNewBrainsHLHeightBox.Text, out int hlHeight))
+            {
+                MessageBox.Show("Invalid desired HL height value, input an integer");
+                return;
+            }
             savedFilesMax = fileMax;
 
             int len = MainGrid.Children.Count;
             for (int i = 0; i < len; i++)
                 MainGrid.Children.RemoveAt(0);
 
-            ModeGenerateNewBrains();
+            ModeGenerateNewBrains(hlWidth, hlHeight);
         }
 
         private void ModeDemoAIButton_Click(object sender, RoutedEventArgs e)
@@ -376,6 +448,12 @@ namespace SnakeGame
                 MessageBox.Show("Invalid iterations value, please input an integer");
                 return;
             }
+            if (!int.TryParse(ModeTrainAIMutationChanceBox.Text, out int mutationChance))
+            {
+                MessageBox.Show("Invalid iterations value, please input an integer");
+                return;
+            }
+            mutationChance = 100 / mutationChance;
             if (!int.TryParse(ModeTrainAINRRBox.Text, out int nrr))
             {
                 MessageBox.Show("Invalid NRR value, please input an integer");
@@ -431,20 +509,22 @@ namespace SnakeGame
             double prevScore = 0;
             for (int i = 0; i < iterations; i++)
             {
+                NewBoard();
                 while (Board1.Progress1Tick())
                     RunBrain();
-                prevScore += CalculateScore()/iterations;
+                prevScore += CalculateScore();
             }
+            prevScore /= iterations;
 
             int count = 1000000000;
             while (--count > 0)
                 {
-                double score = Math.Floor(ModeTrainAI(degree, nrr, iterations));
+                double score = Math.Floor(ModeTrainAI(degree, nrr, iterations, mutationChance));
                 if (score/treshold > prevScore)
                 {
                     try
                     {
-                        string filename = "TrainedSnakeBrainFile" + Math.Floor(score).ToString() + "-" + iterations.ToString() + ".dat";
+                        string filename = "TrainedSnakeBrainFile" + Math.Floor(score).ToString() + "-" + iterations.ToString() + "-" + DateTime.Now.Ticks.ToString() + ".dat";
                         FileStream SnakeBrainFile =
                             new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Write);
                         Formatter.Serialize(SnakeBrainFile, SnakeBrain);
@@ -464,7 +544,6 @@ namespace SnakeGame
                 {
                     SnakeBrain = DeepCopy(prevBrain);
                 }
-                RedrawField();
                 if (savedFilesCount > savedFilesMax)
                     break;
             }

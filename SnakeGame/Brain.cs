@@ -19,8 +19,8 @@ namespace SnakeGame
         private int OutputNeurons { get; set; }
         private double[,] HiddenNeuronsBiasVals { get; set; }
         private double[] OutputNeuronsBiasValues { get; set; }
-        private int HiddenLayerHeight { get; set; }
-        private int HiddenLayerWidth { get; set; }
+        public int HiddenLayerHeight { get; set; }
+        public int HiddenLayerWidth { get; set; }
         // the first index represents connection layer (the fist involve perceptrons, the last 
         // involve output neurons and the others involve intra-hidden layer connections)
         private double[][] NeuronConnections { get; set; }

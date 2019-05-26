@@ -15,7 +15,7 @@
         <Button x:Name="ModeDemoAIButton" Content="Demo AI" ToolTip="Demonstrate a snake brain, to show off how it plays" HorizontalAlignment="Left" Margin="10,113,0,0" VerticalAlignment="Top" Width="75" Background="White" Click="ModeDemoAIButton_Click"/>
         <TextBox ToolTip="the interval to be used, in milliseconds" x:Name="ModeDemoAIInterval" HorizontalAlignment="Left" Height="19" Margin="232,113,0,0" TextWrapping="Wrap" Text="75" VerticalAlignment="Top" Width="120"/>
         <Label Content="Interval in ms" HorizontalAlignment="Left" Margin="90,115,0,0" VerticalAlignment="Top" Height="19" Padding="0" HorizontalContentAlignment="Right" Width="137"/>
-        <Button x:Name="ModeTrainAIButton" Content="Train AI" ToolTip="Train an AI, requires the selection of a snake brain." HorizontalAlignment="Left" Margin="10,155,0,0" VerticalAlignment="Top" Width="75" Background="White" Click="ModeTrainAIButton_Click"/>
+        <Button x:Name="ModeTrainAIButton" Content="Train AI" ToolTip="Train an AI, requires the selection of a snake brain." HorizontalAlignment="Left" Margin="10,158,0,0" VerticalAlignment="Top" Width="75" Background="White" Click="ModeTrainAIButton_Click"/>
         <TextBox ToolTip="The magnitude by which the the snakes are allowed to mutate" x:Name="ModeTrainAIDegreeBox" HorizontalAlignment="Left" Height="19" Margin="232,154,0,0" TextWrapping="Wrap" Text="0.1" VerticalAlignment="Top" Width="120"/>
         <Label Content="Mutation Magnitude" HorizontalAlignment="Left" Margin="90,155,0,0" VerticalAlignment="Top" Height="19" Padding="0" HorizontalContentAlignment="Right" Width="137"/>
         <TextBox ToolTip="The number of games a single snake brain plays before mutating again" x:Name="ModeTrainAIIterationsBox" HorizontalAlignment="Left" Height="19" Margin="232,178,0,0" TextWrapping="Wrap" Text="100" VerticalAlignment="Top" Width="120"/>
@@ -30,5 +30,7 @@
         <Label Content="Height" HorizontalAlignment="Left" Margin="178,75,0,0" VerticalAlignment="Top" Height="19" Padding="0" HorizontalContentAlignment="Right" Width="115"/>
         <TextBox ToolTip="The chance of a mutation in %" x:Name="ModeTrainAIMutationChanceBox" HorizontalAlignment="Left" Height="19" Margin="232,250,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="30"/>
         <Label Content="Mutation Chance %" HorizontalAlignment="Left" Margin="95,251,0,0" VerticalAlignment="Top" Height="19" Padding="0" HorizontalContentAlignment="Right" Width="137"/>
+        <Button x:Name="ModeTrainAIInfoButton" Content="?" HorizontalAlignment="Left" Margin="90,158,0,0" VerticalAlignment="Top" Width="17" Background="White" Click="ModeTrainAIInfoButton_Click"/>
+        <Button x:Name="ModeNewBrainHelpButton" Content="?" HorizontalAlignment="Left" Margin="90,8,0,0" VerticalAlignment="Top" Width="17" Background="White" Click="ModeNewBrainHelpButton_Click"/>
     </Grid>
 </Window>

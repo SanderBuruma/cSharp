@@ -525,7 +525,7 @@ namespace SnakeGame
                 {
                     try
                     {
-                        string filename = "TrainedSnakeBrainFile" + Math.Floor(score).ToString() + "-" + iterations.ToString() + "-" + DateTime.Now.Ticks.ToString() + ".dat";
+                        string filename = "TrainedSnakeBrainFile" + Math.Floor(score).ToString() + "-" + SnakeBrain.HiddenLayerWidth + "-" + SnakeBrain.HiddenLayerHeight + "-" + iterations.ToString() + "-" + DateTime.Now.Ticks.ToString() + ".dat";
                         FileStream SnakeBrainFile =
                             new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Write);
                         Formatter.Serialize(SnakeBrainFile, SnakeBrain);
@@ -565,6 +565,16 @@ namespace SnakeGame
                 ms.Position = 0;
                 return (T)formatter.Deserialize(ms);
             }
+        }
+
+        private void ModeTrainAIInfoButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("This mutates a snake brain and checks whether or not it scores better than the last best mutation. The saved file name numbers (in order) represent average score, hidden layer width, hidden layer height, number of iterations and universal time in ticks.");
+        }
+
+        private void ModeNewBrainHelpButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Generates new brains that can be input into the training function. The first number in the file represents its obtained score (given only 1 run)");
         }
     }
 }

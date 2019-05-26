@@ -17,8 +17,8 @@ namespace SnakeGame
     {
         private int Perceptrons { get; set; }
         private int OutputNeurons { get; set; }
-        private double[,] HiddenNeuronsBaseVals { get; set; }
-        private double[] OutputNeuronsBaseValues { get; set; }
+        private double[,] HiddenNeuronsBiasVals { get; set; }
+        private double[] OutputNeuronsBiasValues { get; set; }
         private int HiddenLayerHeight { get; set; }
         private int HiddenLayerWidth { get; set; }
         // the first index represents connection layer (the fist involve perceptrons, the last 
@@ -33,8 +33,8 @@ namespace SnakeGame
             int outputneurons)
         {
             Perceptrons = perceptrons;
-            HiddenNeuronsBaseVals = new double[hiddenlayerwidth, hiddenlayerheight];
-            OutputNeuronsBaseValues = new double[outputneurons];
+            HiddenNeuronsBiasVals = new double[hiddenlayerwidth, hiddenlayerheight];
+            OutputNeuronsBiasValues = new double[outputneurons];
             NeuronConnections = new double[hiddenlayerwidth + 1][];
             HiddenLayerHeight = hiddenlayerheight;
             HiddenLayerWidth = hiddenlayerwidth;
@@ -47,14 +47,14 @@ namespace SnakeGame
 
             for (int j = 0; j < hiddenlayerwidth; j++)
                 for (int i = 0; i < hiddenlayerheight; i++)
-                    HiddenNeuronsBaseVals[j, i] = RandomDouble();
+                    HiddenNeuronsBiasVals[j, i] = RandomDouble();
 
             for (int i = 0; i < NeuronConnections.Length; i++)
                 for (int j = 0; j < NeuronConnections[i].Length; j++)
                     NeuronConnections[i][j] = RandomDouble();
 
-            for (int i = 0; i < OutputNeuronsBaseValues.Length; i++)
-                OutputNeuronsBaseValues[i] = RandomDouble();
+            for (int i = 0; i < OutputNeuronsBiasValues.Length; i++)
+                OutputNeuronsBiasValues[i] = RandomDouble();
         }
 
         public double[] InputToOutput(double[] perceptronValues)
@@ -69,8 +69,8 @@ namespace SnakeGame
                 nextLayerNeurons[i] = 0;
                 for (int j = 0; j < Perceptrons; j++)
                     nextLayerNeurons[i] += perceptronValues[j] * NeuronConnections[0][j + i * Perceptrons];
-                nextLayerNeurons[i] += HiddenNeuronsBaseVals[0, i];
-                nextLayerNeurons[i] = Sigmoid(nextLayerNeurons[i]);
+                nextLayerNeurons[i] += HiddenNeuronsBiasVals[0, i];
+                nextLayerNeurons[i] = Squash(nextLayerNeurons[i]);
             }
 
             // propagate values from one hidden layer to the next
@@ -85,8 +85,8 @@ namespace SnakeGame
                 {
                     for (int k = 0; k < HiddenLayerHeight; k++)
                         nextLayerNeurons[j] += currentLayerNeurons[i - 1] * NeuronConnections[i][j * HiddenLayerHeight + k];
-                    nextLayerNeurons[j] += HiddenNeuronsBaseVals[i - 1, j];
-                    nextLayerNeurons[j] = Sigmoid(nextLayerNeurons[j]);
+                    nextLayerNeurons[j] += HiddenNeuronsBiasVals[i - 1, j];
+                    nextLayerNeurons[j] = Squash(nextLayerNeurons[j]);
                 }
             }
 
@@ -98,8 +98,8 @@ namespace SnakeGame
                 nextLayerNeurons[i] = 0;
                 for (int j = 0; j < HiddenLayerHeight; j++)
                     nextLayerNeurons[i] += NeuronConnections[NeuronConnections.Length - 1][i * OutputNeurons + j] * currentLayerNeurons[j];
-                nextLayerNeurons[i] += OutputNeuronsBaseValues[i];
-                nextLayerNeurons[i] = Sigmoid(nextLayerNeurons[i]);
+                nextLayerNeurons[i] += OutputNeuronsBiasValues[i];
+                nextLayerNeurons[i] = Squash(nextLayerNeurons[i]);
             }
 
             return nextLayerNeurons;
@@ -117,13 +117,13 @@ namespace SnakeGame
                 for (int j = 0; j < HiddenLayerHeight; j++)
                 {
                     if (rng.Next(chanceOfMutation) != 0) continue;
-                    HiddenNeuronsBaseVals[i, j] += MutationMagnitude(normalRangeRepeats, degree);
+                    HiddenNeuronsBiasVals[i, j] += MutationMagnitude(normalRangeRepeats, degree);
                 }
 
             for (int i = 0; i < OutputNeurons; i++)
                 {
                     if (rng.Next(chanceOfMutation) != 0) continue;
-                    OutputNeuronsBaseValues[i] += MutationMagnitude(normalRangeRepeats, degree);
+                    OutputNeuronsBiasValues[i] += MutationMagnitude(normalRangeRepeats, degree);
                 }
 
             for (int i = 0; i < NeuronConnections.Length; i++)
@@ -138,9 +138,9 @@ namespace SnakeGame
             return (double)rng.Next(5)-2;
         }
 
-        public static double Sigmoid(double value)
+        public static double Squash(double value)
         {
-            return 1.0f / (1.0f + (float)Math.Exp(-value));
+            return Math.Max(0,value);
         }
 
         public double MutationMagnitude(int nrr, double degree)

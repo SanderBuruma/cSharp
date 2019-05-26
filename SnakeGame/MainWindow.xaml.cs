@@ -32,7 +32,7 @@ namespace SnakeGame
         private readonly Random rng = new Random();
         private readonly BinaryFormatter Formatter = new BinaryFormatter();
         private int savedFilesCount = 0;
-        private int savedFilesMax = 1000;
+        private int savedFilesMax = 10000;
 
         public MainWindow()
         {
@@ -169,9 +169,6 @@ namespace SnakeGame
                 RunBrain();
             else
             {//gameOver
-                MyTimer.Enabled = false;
-                //MessageBox.Show("This bot scored " + string.Format("{0:N2}", CalculateScore()) + " points!\nIt crashed or it ran out of time.");
-                MyTimer.Enabled = true;
                 NewBoard();
             }
         }
@@ -195,6 +192,7 @@ namespace SnakeGame
                 0,
                 0,
                 0,
+                ///memory perceptrons, which perceive the previous value of the memory perceptrons and move on the values once.
             };
 
             double[] tailDistances = new double[4] {
@@ -295,10 +293,13 @@ namespace SnakeGame
                 if (maxvalue == brainThoughts[i])
                 {
                     if (i == 1)
+                    {
                         Board1.ChangeDirection(Board.Direction.right);
+                    }
                     else if (i == 2)
+                    {
                         Board1.ChangeDirection(Board.Direction.left);
-                    break;
+                    }
                 }
             }
         }
@@ -337,7 +338,7 @@ namespace SnakeGame
 
         private double CalculateScore()
         {
-            return Math.Pow(Board1.TailLength, 2) / Board1.Tick * 1e3;
+            return Board1.TailLength * 1e2 / Math.Log(Board1.Tick);
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -518,8 +519,8 @@ namespace SnakeGame
 
             int count = 1000000000;
             while (--count > 0)
-                {
-                double score = Math.Floor(ModeTrainAI(degree, nrr, iterations, mutationChance));
+            {
+                double score = ModeTrainAI(degree, nrr, iterations, mutationChance);
                 if (score/treshold > prevScore)
                 {
                     try

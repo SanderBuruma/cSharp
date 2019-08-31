@@ -25,7 +25,7 @@ namespace SnakeGame
         public bool GameOver = false;
         private bool CanSwitchDir = true;
         private readonly Random rng = new Random();
-        public Board(int widthHeight, int i = -1)
+        public Board(int widthHeight)
         {
             if (widthHeight % 2 != 0)
                 widthHeight++;
@@ -38,7 +38,7 @@ namespace SnakeGame
             TailX = new int[WidthHeight * WidthHeight];
             TailY = new int[WidthHeight * WidthHeight];
             TailLength = 1;
-            TailX[0] = SnakeHeadX-1;
+            TailX[0] = SnakeHeadX - 1;
             TailY[0] = SnakeHeadY;
 
             int rnNum = FindEmptyField();
@@ -48,8 +48,6 @@ namespace SnakeGame
             FieldsCount = widthHeight * widthHeight;
             Fields = new Field[FieldsCount];
 
-            if (i > -1) rng = new Random(i);
-
             RedrawFields();
         }
         public void ChangeDirection(Direction dir)
@@ -58,8 +56,8 @@ namespace SnakeGame
             if (CanSwitchDir)
                 if (dir == Direction.right)
                     SnakeDirection = (Direction)((k + 1) % 4);
-                if (dir == Direction.left)
-                    SnakeDirection = (Direction)((k + 3) % 4);
+            if (dir == Direction.left)
+                SnakeDirection = (Direction)((k + 3) % 4);
         }
         public bool Progress1Tick()
         {
@@ -144,8 +142,11 @@ namespace SnakeGame
             Fields[SnakeHeadX + SnakeHeadY * WidthHeight] = Field.head;
             Fields[FoodX + FoodY * WidthHeight] = Field.food;
         }
+        /*
+         * randomly finds an empty field. Requires >10% of the board to be empty in order not to take too long. 
+         */
         private int FindEmptyField()
-        {//randomly finds empty field
+        {
 
             int max = (int)Math.Pow(WidthHeight, 2);
             int randomField;
@@ -153,6 +154,7 @@ namespace SnakeGame
             while (true)
             {
                 randomField = rng.Next(max);
+
 
                 bool isEmpty = true;
                 if (SnakeHeadX == X(randomField) ||

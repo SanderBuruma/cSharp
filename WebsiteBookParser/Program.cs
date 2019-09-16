@@ -57,13 +57,13 @@ namespace WebsiteBookParser
                 }
             }
 
-            var file = new Epub.Document();
-            file.AddAuthor("st Alphonsus Ligouri");
-            file.AddDescription("A collection of meditations and readings by a great Saint and Doctor of the church");
-            file.AddTitle("Meditations and Readings of Saint Alphonsus");
+            //var file = new Epub.Document();
+            //file.AddAuthor("st Alphonsus Ligouri");
+            //file.AddDescription("A collection of meditations and readings by a great Saint and Doctor of the church");
+            //file.AddTitle("Meditations and Readings of Saint Alphonsus");
 
             string wholeBookString = "";
-            foreach (var link in weekLinkList.GetRange(0,10))
+            foreach (var link in weekLinkList)
             {
 
                 try
@@ -72,11 +72,7 @@ namespace WebsiteBookParser
                     htmlDocument = new HtmlDocument();
                     htmlDocument.LoadHtml(html);
                     var pageContentDiv = htmlDocument.DocumentNode.Descendants("div").Where(node => node.GetAttributeValue("class", "") == "content").First();
-                    wholeBookString += "\n\n" + pageContentDiv.Descendants("h1").First().InnerText;
-                    foreach (var item in pageContentDiv.Descendants("p"))
-                    {
-                        wholeBookString += "\n\n" + item.InnerText;
-                    }
+                    wholeBookString += pageContentDiv.InnerHtml;
                 }
                 catch (Exception e)
                 {
@@ -86,7 +82,7 @@ namespace WebsiteBookParser
                 }
             }
 
-            File.WriteAllText(@"C:\Users\Cubit32\Desktop\temp\meditationsandreadingsstalphonsus.txt", wholeBookString);
+            File.WriteAllText(@"C:\Users\Cubit32\Desktop\temp\meditationsandreadingsstalphonsus.html", wholeBookString);
         }
     }
 }

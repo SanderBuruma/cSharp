@@ -8,7 +8,7 @@
         Title="Snake AI Neural Network Game" Height="363.6" Width="367.6" ResizeMode="NoResize" Background="#DDD" KeyDown="Window_KeyDown">
     <Grid x:Name="MainGrid" Margin="0,0,3.2,-0.4">
         <Button x:Name="ModeNewBrainsBtn" Content="New Brains" ToolTip="Generate new brains which score above a certain treshold" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="75" Background="White" Click="ModeNewBrainsBtn_Click"/>
-        <TextBox x:Name="ModeNewBrainsTresholdBox" ToolTip="The score a new untrained brain must reach to be recorded in a file." HorizontalAlignment="Left" Height="19" Margin="232,10,0,0" TextWrapping="Wrap" Text="2e2" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="ModeNewBrainsTresholdBox" ToolTip="The score a new untrained brain must reach to be recorded in a file." HorizontalAlignment="Left" Height="19" Margin="232,10,0,0" TextWrapping="Wrap" Text="50" VerticalAlignment="Top" Width="120"/>
         <Label Content="Treshold Score" HorizontalAlignment="Left" Margin="90,10,0,0" VerticalAlignment="Top" Height="19" Padding="0" HorizontalContentAlignment="Right" Width="137"/>
         <TextBox ToolTip="The program will stop running after it finds this number of snake brains that score above the treshold" x:Name="ModeNewBrainsQuantityBox" HorizontalAlignment="Left" Height="19" Margin="232,29,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="120"/>
         <Label Content="Desired Brains" HorizontalAlignment="Left" Margin="90,29,0,0" VerticalAlignment="Top" Height="19" Padding="0" HorizontalContentAlignment="Right" Width="137"/>

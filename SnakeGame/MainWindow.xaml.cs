@@ -15,6 +15,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Threading;
+using System.Diagnostics;
 
 namespace SnakeGame
 {
@@ -24,7 +26,7 @@ namespace SnakeGame
         internal Board Board1 { get; set; }
         private Rectangle[] FieldRectangles { get; set; }
         private Brain SnakeBrain { get; set; }
-        private Timer MyTimer { get; set; }
+        private System.Timers.Timer MyTimer { get; set; }
         private double ScoreTreshold { get; set; } = 2e3;
         private int TimerInterval { get; set; } = 75;
         private double MinScore { get; set; }
@@ -43,7 +45,7 @@ namespace SnakeGame
             MainWindow1.Height = 42 + (RectWidth + RectSpacing) * BoardWH;
         }
         /// <summary>
-        /// This mode should generate new SnakeBrain####.dat files which have scored above a certain treshold
+        /// Draws a physical representation of the board
         /// </summary>
         private void DrawFieldRectangles()
         {
@@ -70,6 +72,7 @@ namespace SnakeGame
             NewBoard();
             DrawFieldRectangles();
             NewBrain(hlWidth, hlHeight);
+
             while (savedFilesCount < savedFilesMax)
             {
                 RedrawField();
@@ -119,16 +122,17 @@ namespace SnakeGame
                 NewBrain(hlWidth, hlHeight);
             }
             MessageBox.Show("End of program, " + savedFilesCount.ToString() + " brain files generated.\nReview the executables' folder to see the brain files");
+            Restart();
         }
         /// <summary>
-        /// this mode is intended to observably demonstrate an AI (aka. snake brain) from a file
+        /// this mode is intended to demonstrate an AI (aka. snake brain) from a file
         /// </summary>
         private void ModeDemoAi()
         {
             NewBoard();
             DrawFieldRectangles();
 
-            MyTimer = new Timer();
+            MyTimer = new System.Timers.Timer();
             MyTimer.Elapsed += new ElapsedEventHandler(DemoAIEvent);
             MyTimer.Interval = TimerInterval;
             MyTimer.Enabled = true;
@@ -144,6 +148,7 @@ namespace SnakeGame
         {
             SnakeBrain.Mutate(mutateMagnitude, mutateNRR, mutationChance);
             double averageScore = 0;
+
             for (int i = 0; i < iterations; i++)
             {
                 NewBoard(i);
@@ -152,7 +157,6 @@ namespace SnakeGame
                 averageScore += CalculateScore();
             }
             return averageScore / iterations;
-
         }
         private void DemoAIEvent(object source, ElapsedEventArgs e)
         {
@@ -291,13 +295,22 @@ namespace SnakeGame
         {
             return Board1.TailLength * 1e2 / Math.Log(Board1.Tick);
         }
+        
+        /// <summary>
+        /// Restart the program
+        /// </summary>
+        private void Restart()
+        {
+            Process.Start(Application.ResourceAssembly.Location);
+            Application.Current.Shutdown();
+        }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.Key)
             {
-                case Key.Escape:
-                    Application.Current.Shutdown();
+                case Key.R:
+                    Restart();
                     break;
                 case Key.P:
                     RedrawField();
@@ -486,7 +499,6 @@ namespace SnakeGame
                             Formatter.Serialize(SnakeBrainFile, SnakeBrain);
                             SnakeBrainFile.Close();
                             savedFilesCount++;
-                            //MessageBox.Show("Saved snakebrain as " + filename);
                         }
                         catch (Exception err)
                         {

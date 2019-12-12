@@ -67,6 +67,11 @@ namespace SnakeGame
                 }
 
         }
+        /**
+         * <summary>Generates new brains, the size of the brain is determined by height * width</summary>
+         * <param name="hlHeight">determines thd width of the hidden layer</param>
+         * <param name="hlWidth">determines the height of the hidden layers</param>
+         */
         private void ModeGenerateNewBrains(int hlWidth, int hlHeight)
         {
             NewBoard();

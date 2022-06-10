@@ -88,7 +88,7 @@ namespace SnakeGame
         public double[] InputToOutput(double[] perceptronValues)
         {
             if (perceptronValues.Length != Perceptrons)
-                throw new Exception("perceptron values must be of equal length to the set number of perceptrons of this brain");
+                throw new ArgumentException("perceptron values array must be of equal size to the set number of perceptrons of this brain");
 
             // propagate the first time from perceptrons to hidden layer
             double[] nextLayerNeurons = new double[HiddenLayerHeight];

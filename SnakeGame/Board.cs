@@ -9,7 +9,7 @@ namespace SnakeGame
     class Board
     {
         public int WidthHeight { get; set; }
-        public int FieldsCount { get; set; }
+        public int FieldsCount => WidthHeight * WidthHeight;
         public Field[] Fields { get; set; }
         public Direction SnakeDirection { get; set; }
         public int SnakeHeadX { get; set; }
@@ -45,7 +45,6 @@ namespace SnakeGame
             FoodX = X(rnNum);
             FoodY = Y(rnNum);
 
-            FieldsCount = widthHeight * widthHeight;
             Fields = new Field[FieldsCount];
 
             if (i > -1) rng = new Random(i);
@@ -221,9 +220,9 @@ namespace SnakeGame
         internal enum Field
         {
             empty,
-            head,
-            tail,
-            food
+            head = -3,
+            tail = -5,
+            food = 10
         }
         internal enum Direction
         {

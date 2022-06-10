@@ -22,7 +22,8 @@ namespace SnakeGame
 {
     public partial class MainWindow : Window
     {
-        private readonly int BoardWH = 16;
+        private const int BoardWH = 16;
+        private const int BoardSquaresCount = BoardWH * BoardWH;
         internal Board Board1 { get; set; }
         private Rectangle[] FieldRectangles { get; set; }
         private Brain SnakeBrain { get; set; }
@@ -112,15 +113,12 @@ namespace SnakeGame
                         Formatter.Serialize(SnakeBrainFile, SnakeBrain);
                         SnakeBrainFile.Close();
                         savedFilesCount++;
-                        //MessageBox.Show("Saved snakebrain as " + filename);
                     }
                     catch (Exception err)
                     {
                         MessageBox.Show("Error saving snake brain.");
                         MessageBox.Show(err.Message);
                     }
-
-                    //MessageBox.Show("You crashed into your own tail and died or you ran out of time, your final score was " + string.Format("{0:N2}", score) + "\n\nGrow more quickly and grow larger to gain a larger score");
                 }
 
                 NewBoard();
@@ -191,58 +189,27 @@ namespace SnakeGame
         }
         private void RunBrain()
         {
-
-            double[] tailDistances = new double[4] {
-                Board1.WidthHeight-1,
-                Board1.WidthHeight-1,
-                Board1.WidthHeight-1,
-                Board1.WidthHeight-1 };
-            for (int i = 0; i < Board1.TailLength; i++)
-            {
-                if (Board1.TailY[i] == Board1.SnakeHeadY)
-                {
-                    tailDistances[0] = Math.Min(tailDistances[0], Board1.DistanceLeft(Board1.SnakeHeadX, Board1.TailX[i]));
-                    tailDistances[2] = Math.Min(tailDistances[2], Board1.DistanceRight(Board1.SnakeHeadX, Board1.TailX[i]));
-                }
-                if (Board1.TailX[i] == Board1.SnakeHeadX)
-                {
-                    tailDistances[1] = Math.Min(tailDistances[1], Board1.DistanceUp(Board1.SnakeHeadY, Board1.TailY[i]));
-                    tailDistances[3] = Math.Min(tailDistances[3], Board1.DistanceDown(Board1.SnakeHeadY, Board1.TailY[i]));
-                }
-            }
-            int[] foodDistances = new int[4] {
-                Board1.DistanceLeft(Board1.SnakeHeadX, Board1.FoodX),
-                Board1.DistanceUp(Board1.SnakeHeadY, Board1.FoodY),
-                Board1.DistanceRight(Board1.SnakeHeadX, Board1.FoodX),
-                Board1.DistanceDown(Board1.SnakeHeadY, Board1.FoodY)
-            };
-
-
-
             int k = (int)Board1.SnakeDirection;
 
-            int horizontalDistance;
-            int verticalDistance;
-            if (foodDistances[k] > foodDistances[(k + 2) % 4])
-                verticalDistance = -foodDistances[(k + 2) % 4];
-            else
-                verticalDistance = foodDistances[k];
-            if (foodDistances[(k + 1) % 4] > foodDistances[(k + 3) % 4])
-                horizontalDistance = -foodDistances[(k + 3) % 4];
-            else
-                horizontalDistance = foodDistances[(k + 1) % 4];
+            double[] perceptronsValues = new double[BoardSquaresCount];
 
-
-            double[] perceptronsValues = new double[4]
+            double[,] twoDArray = new double[BoardWH,BoardWH];
+            for (int i = 0; i < BoardWH; i++)
             {
-                //a bearing value to the next food piece relative to the current snake heading.
-                //vertical goes into the x argument to make sure that a dead ahead food direction leads to a value of 0
-                Math.Atan2(horizontalDistance, verticalDistance),
-                //whether or not a tail piece is ahead of, to the left of or to the right of the snake head
-                tailDistances[k],
-                tailDistances[(k+3)%4],
-                tailDistances[(k+1)%4],
-            };
+                for (int j = 0; j < BoardWH; j++)
+                {
+                    twoDArray[i, j] = (double)Board1.Fields[i + j * 16];
+                }
+            }
+            for (int i = 0; i < (int)Board1.SnakeDirection; i++)
+            {
+                twoDArray = Tools.RotateMatrix(twoDArray, Board1.WidthHeight);
+            }
+
+            for (int i = 0; i < BoardSquaresCount; i++)
+            {
+                perceptronsValues[i] = twoDArray[i%BoardWH,i/BoardWH];
+            }
 
             //calculate what the brain "thinks" that it should do
             double[] brainThoughts = SnakeBrain.InputToOutput(perceptronsValues);
@@ -266,7 +233,7 @@ namespace SnakeGame
 
         private void NewBrain(int hlWidth, int hlHeight)
         {
-            SnakeBrain = new Brain(4, hlWidth, hlHeight, 3);
+            SnakeBrain = new Brain(BoardWH * BoardWH, hlWidth, hlHeight, 3);
         }
         private void NewBoard(int i = -1)
         {
@@ -278,15 +245,26 @@ namespace SnakeGame
             switch (field)
             {
                 case Board.Field.empty:
+                {
                     return Brushes.White;
+                }
                 case Board.Field.head:
+                {
                     return Brushes.Black;
+                }
                 case Board.Field.tail:
+                {
                     return Brushes.Green;
+                }
                 case Board.Field.food:
+                {
                     return Brushes.LightGreen;
+                }
+                default:
+                {
+                    return Brushes.White;
+                }
             }
-            return Brushes.White;
         }
         private void Pause()
         {
